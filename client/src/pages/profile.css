@@ -1,0 +1,155 @@
+/* Background */
+.profile-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f172a, #1e293b, #0f172a);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 15px;
+  color: #f1f5f9;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Card */
+.profile-card {
+  background: rgba(30, 41, 59, 0.85); /* glass effect */
+  border-radius: 20px;
+  max-width: 650px;
+  width: 100%;
+  padding: 35px;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(14px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6),
+              0 0 25px rgba(56, 189, 248, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.profile-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7),
+              0 0 35px rgba(56, 189, 248, 0.4);
+}
+
+/* Header */
+.profile-header {
+  margin-bottom: 25px;
+  text-align: center;
+}
+.profile-avatar {
+  width: 130px;
+  height: 130px;
+  margin: 0 auto 15px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 4px solid #38bdf8;
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.7);
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+.profile-avatar:hover {
+  transform: rotate(6deg) scale(1.05);
+  box-shadow: 0 0 30px rgba(56, 189, 248, 1);
+}
+.profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.profile-header h2 {
+  font-weight: bold;
+  color: #38bdf8;
+  text-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
+}
+.profile-header p {
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+/* Info Section */
+.profile-info {
+  margin-bottom: 25px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 15px 20px;
+}
+.section-title {
+  font-weight: bold;
+  margin-bottom: 12px;
+  color: #38bdf8;
+  text-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
+}
+.profile-info ul li {
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.95rem;
+}
+.profile-info ul li:last-child {
+  border-bottom: none;
+}
+
+/* Buttons */
+.profile-actions button {
+  font-weight: bold;
+  border-radius: 12px;
+  transition: all 0.25s ease-in-out;
+  padding: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+.profile-actions button:hover {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 6px 20px rgba(56, 189, 248, 0.4);
+}
+
+/* Modal Backdrop */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(10px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1050;
+  animation: fadeIn 0.3s ease;
+}
+
+/* Modal Card */
+.modal-card {
+  background: rgba(30, 41, 59, 0.95);
+  padding: 25px;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 450px;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.6),
+              0 0 25px rgba(56, 189, 248, 0.3);
+  animation: scaleUp 0.3s ease;
+}
+.modal-card h3 {
+  color: #38bdf8;
+  margin-bottom: 15px;
+  font-weight: bold;
+  text-align: center;
+}
+.modal-card input {
+  background: rgba(255, 255, 255, 0.08);
+  color: #f1f5f9;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  padding: 12px;
+}
+.modal-card input:focus {
+  outline: none;
+  border-color: #38bdf8;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes scaleUp {
+  from { transform: scale(0.85); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}

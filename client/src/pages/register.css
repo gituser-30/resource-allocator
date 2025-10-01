@@ -1,0 +1,145 @@
+/* Container */
+.register-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: #0f172a;
+  color: #fff;
+  font-family: "Inter", sans-serif;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Background SVG */
+.background-svg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.2;
+}
+
+/* Card */
+.register-card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 600px;
+  background: rgba(17, 25, 40, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 2rem;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  animation: fadeInUp 0.8s ease;
+}
+
+/* Header */
+.register-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+.register-header h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+.register-header p {
+  font-size: 0.9rem;
+  color: #cbd5e1;
+}
+
+/* Icon */
+.icon-circle {
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(135deg, #3a0ca3, #4361ee);
+  border-radius: 50%;
+  margin: 0 auto 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 5px 15px rgba(67, 97, 238, 0.4);
+}
+
+/* Form */
+.animated-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.form-group input {
+  width: 100%;
+  padding: 0.9rem;
+  border-radius: 10px;
+  border: 1px solid #334155;
+  background: #1e293b;
+  color: #fff;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+.form-group input:focus {
+  outline: none;
+  border-color: #4361ee;
+  box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.3);
+}
+
+/* Button */
+.btn-primary {
+  margin-top: 1rem;
+  padding: 0.9rem;
+  background: linear-gradient(135deg, #4361ee, #3a0ca3);
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(67, 97, 238, 0.5);
+}
+
+/* Messages */
+.message-box {
+  padding: 0.7rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  text-align: center;
+  font-weight: 500;
+}
+.message-box.error {
+  background: rgba(239, 68, 68, 0.7);
+}
+.message-box.success {
+  background: rgba(34, 197, 94, 0.7);
+}
+
+/* Footer */
+.signup-text {
+  margin-top: 1.2rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #94a3b8;
+}
+.login-link-text {
+  color: #60a5fa;
+  font-weight: 600;
+  text-decoration: none;
+}
+.login-link-text:hover {
+  color: #93c5fd;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

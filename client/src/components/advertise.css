@@ -1,0 +1,27 @@
+.advertise-slide {
+  position: relative;
+}
+
+.advertise-img {
+  width: 100%;
+  height: 500px;
+  object-fit: cover;
+  filter: brightness(70%);
+}
+
+.advertise-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: white;
+}
+
+.advertise-overlay h1 {
+  font-size: 2.5rem;
+}
+
+.advertise-overlay h4 {
+  color: #f9a825;
+}
