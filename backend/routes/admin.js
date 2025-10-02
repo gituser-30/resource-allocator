@@ -1,67 +1,38 @@
+// routes/admin.js
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const path = require("path");
+const multer = require("multer");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const cloudinary = require("cloudinary").v2;
+
 const Admin = require("../models/Admin");
 const Assignment = require("../models/Assignment");
 const Note = require("../models/Note");
-const User = require("../models/User");
 const PYQ = require("../models/PYQ");
-const path = require("path");
+const User = require("../models/User");
 
-
-const cors = require("cors");
-const app = express();
-
-// ===== CORS CONFIG =====
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://dbatu-scholor-hub.onrender.com",
-  "https://resource-allocator-admin.onrender.com"
-];
-
-// Allow all origins temporarily if needed
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) callback(null, true);
-    else callback(new Error("Not allowed by CORS"));
-  },
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE"]
-}));
-
-app.use(express.json());
-
-// const adminRoutes = require("./routes/adminRoutes");
-// app.use("/api/admin", adminRoutes);
+require("dotenv").config();
 
 const router = express.Router();
 
-// ---------------- Multer + Cloudinary Setup ----------------
-const cloudinary = require("cloudinary").v2;
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
-const multer = require("multer");
-
+// ---------------- Cloudinary Config ----------------
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
   api_key: process.env.CLOUD_API_KEY,
   api_secret: process.env.CLOUD_API_SECRET,
 });
 
+// Common storage for all resources
 const storage = new CloudinaryStorage({
   cloudinary,
   params: {
-    folder: "resources", // common folder for assignments, notes, pyqs
+    folder: "resources",
     allowed_formats: ["pdf", "jpg", "jpeg", "png"],
   },
 });
-
 const upload = multer({ storage });
-
-// ===== STATIC FOLDER =====
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
-// ===== TEST ROUTE =====
-app.get("/", (req, res) => res.send("Backend is running!"));
 
 // ---------------- Admin Auth ----------------
 router.post("/login", async (req, res) => {
@@ -141,7 +112,7 @@ router.get("/pyqs/count", async (_, res) => {
 });
 
 // ---------------- Assignments ----------------
-rapp.get("/api/admin/assignments", async (req, res) => {
+router.get("/assignments", async (req, res) => {
   try {
     const assignments = await Assignment.find().sort({ createdAt: -1 });
     res.json({ success: true, assignments });
@@ -151,7 +122,7 @@ rapp.get("/api/admin/assignments", async (req, res) => {
   }
 });
 
-app.post("/api/admin/assignments", uploadCloud.single("file"), async (req, res) => {
+router.post("/assignments", upload.single("file"), async (req, res) => {
   try {
     const { title, department, semester, subject } = req.body;
     if (!title || !department || !semester || !subject || !req.file) {
@@ -163,7 +134,7 @@ app.post("/api/admin/assignments", uploadCloud.single("file"), async (req, res) 
       department,
       semester,
       subject,
-      fileUrl: req.file.path
+      fileUrl: req.file.path,
     });
 
     await newAssignment.save();
@@ -173,7 +144,6 @@ app.post("/api/admin/assignments", uploadCloud.single("file"), async (req, res) 
     res.status(500).json({ success: false, message: "Failed to add assignment" });
   }
 });
-
 
 // ---------------- Notes ----------------
 router.get("/notes", async (req, res) => {
@@ -202,7 +172,7 @@ router.post("/notes", upload.single("file"), async (req, res) => {
       subject,
       department,
       semester,
-      fileUrl: req.file.path, // Cloudinary URL
+      fileUrl: req.file.path,
     });
 
     await newNote.save();
@@ -241,7 +211,7 @@ router.post("/pyqs", upload.single("file"), async (req, res) => {
       description,
       department,
       semester: Number(semester),
-      fileUrl: req.file.path, // Cloudinary URL
+      fileUrl: req.file.path,
     });
 
     await newPYQ.save();
