@@ -45,7 +45,7 @@ const Register = () => {
       data.append("password", formData.password);
       if (profilePhoto) data.append("profilePhoto", profilePhoto);
 
-      await axios.post("http://localhost:5000/api/auth/register", data, {
+      await axios.post("https://resource-allocator-backendservice.onrender.com/api/auth/register", data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
