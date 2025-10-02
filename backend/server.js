@@ -25,11 +25,29 @@ const app = express();
 
 // Middleware
 app.use(express.json());
+// app.use(cors({
+//   origin: "https://dbatu-scholor-hub.onrender.com", // your frontend URL
+//   methods: ["GET", "POST", "PUT", "DELETE"],
+//   credentials: true
+// }));
+
+const allowedOrigins = [
+  "https://dbatu-scholor-hub.onrender.com",
+  "http://localhost:5173" // local dev
+];
+
 app.use(cors({
-  origin: "https://dbatu-scholor-hub.onrender.com", // your frontend URL
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
+
 
 const userRoutes = require("./routes/user");
 app.use("/api/users", userRoutes);
@@ -44,9 +62,13 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 
 // ================== MongoDB Connection ==================
-mongoose.connect("mongodb://127.0.0.1:27017/Dbatu_scholar_hub")
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
   .then(() => console.log("✅ MongoDB Connected"))
   .catch(err => console.error("❌ MongoDB Error:", err));
+
 
 // ================== CONTACT ROUTE ==================
 app.post("/contact", async (req, res) => {
