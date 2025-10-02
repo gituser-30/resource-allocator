@@ -16,7 +16,7 @@ const Notes = () => {
     if (department && semester) {
       axios
         .get(
-          `http://localhost:5000/api/resources?department=${department}&semester=${semester}`
+          `https://resource-allocator-backendservice.onrender.com/api/resources?department=${department}&semester=${semester}`
         )
         .then((res) => setNotes(res.data))
         .catch((err) => console.log(err));
@@ -199,7 +199,7 @@ const Notes = () => {
                   </div>
                   <div className="card-footer bg-transparent border-0 text-center">
                     <a
-                      href={`http://localhost:5000${note.fileUrl}`}
+                      href={`https://resource-allocator-backendservice.onrender.com${note.fileUrl}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="btn btn-sm btn-outline-info fw-bold me-2"
