@@ -19,8 +19,8 @@ app.use(cors({
 
 app.use(express.json());
 
-const adminRoutes = require("./routes/adminRoutes");
-app.use("/api/admin", adminRoutes);
+// const adminRoutes = require("./routes/adminRoutes");
+// app.use("/api/admin", adminRoutes);
 
 const router = express.Router();
 
