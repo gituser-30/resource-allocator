@@ -49,11 +49,17 @@ const storage = new CloudinaryStorage({
   cloudinary,
   params: {
     folder: "resources", // common folder for assignments, notes, pyqs
-    allowed_formats: ["pdf"],
+    allowed_formats: ["pdf", "jpg", "jpeg", "png"],
   },
 });
 
 const upload = multer({ storage });
+
+// ===== STATIC FOLDER =====
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+// ===== TEST ROUTE =====
+app.get("/", (req, res) => res.send("Backend is running!"));
 
 // ---------------- Admin Auth ----------------
 router.post("/login", async (req, res) => {
@@ -133,14 +139,9 @@ router.get("/pyqs/count", async (_, res) => {
 });
 
 // ---------------- Assignments ----------------
-router.get("/assignments", async (req, res) => {
+rapp.get("/api/admin/assignments", async (req, res) => {
   try {
-    const { department, semester } = req.query;
-    const filter = {};
-    if (department) filter.department = department;
-    if (semester) filter.semester = semester;
-
-    const assignments = await Assignment.find(filter).sort({ createdAt: -1 });
+    const assignments = await Assignment.find().sort({ createdAt: -1 });
     res.json({ success: true, assignments });
   } catch (err) {
     console.error("Fetch Assignments Error:", err);
@@ -148,25 +149,26 @@ router.get("/assignments", async (req, res) => {
   }
 });
 
-router.post("/assignments", upload.single("file"), async (req, res) => {
+app.post("/api/admin/assignments", uploadCloud.single("file"), async (req, res) => {
   try {
-    const { department, semester, subject, title } = req.body;
-    if (!department || !semester || !subject || !req.file)
+    const { title, department, semester, subject } = req.body;
+    if (!title || !department || !semester || !subject || !req.file) {
       return res.status(400).json({ success: false, message: "All fields are required" });
+    }
 
     const newAssignment = new Assignment({
       title,
       department,
       semester,
       subject,
-      fileUrl: req.file.path, // Cloudinary URL
+      fileUrl: req.file.path
     });
 
     await newAssignment.save();
     res.status(201).json({ success: true, assignment: newAssignment });
   } catch (err) {
     console.error("Add Assignment Error:", err);
-    res.status(500).json({ success: false, message: err.message }); // <-- show the real error
+    res.status(500).json({ success: false, message: "Failed to add assignment" });
   }
 });
 
