@@ -1,22 +1,48 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const path = require("path");
-const multer = require("multer");
-
 const Admin = require("../models/Admin");
 const Assignment = require("../models/Assignment");
 const Note = require("../models/Note");
 const User = require("../models/User");
 const PYQ = require("../models/PYQ");
 
+const cors = require("cors");
+const app = express();
+
+app.use(cors({
+  origin: "https://resource-allocator-admin.onrender.com", // your frontend domain
+  methods: ["GET","POST","PUT","DELETE","OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true, // if using cookies or auth headers
+}));
+
+app.use(express.json());
+
+const adminRoutes = require("./routes/adminRoutes");
+app.use("/api/admin", adminRoutes);
+
 const router = express.Router();
 
-// ---------------- Multer Setup ----------------
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, "uploads/"),
-  filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
+// ---------------- Multer + Cloudinary Setup ----------------
+const cloudinary = require("cloudinary").v2;
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const multer = require("multer");
+
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.CLOUD_API_KEY,
+  api_secret: process.env.CLOUD_API_SECRET,
 });
+
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: "resources", // common folder for assignments, notes, pyqs
+    allowed_formats: ["pdf"],
+  },
+});
+
 const upload = multer({ storage });
 
 // ---------------- Admin Auth ----------------
@@ -123,7 +149,7 @@ router.post("/assignments", upload.single("file"), async (req, res) => {
       department,
       semester,
       subject,
-      fileUrl: `/uploads/${req.file.filename}`,
+      fileUrl: req.file.path, // Cloudinary URL
     });
 
     await newAssignment.save();
@@ -161,7 +187,7 @@ router.post("/notes", upload.single("file"), async (req, res) => {
       subject,
       department,
       semester,
-      fileUrl: `/uploads/${req.file.filename}`,
+      fileUrl: req.file.path, // Cloudinary URL
     });
 
     await newNote.save();
@@ -172,13 +198,42 @@ router.post("/notes", upload.single("file"), async (req, res) => {
   }
 });
 
-router.delete("/notes/:id", async (req, res) => {
+// ---------------- PYQs ----------------
+router.get("/pyqs", async (req, res) => {
   try {
-    await Note.findByIdAndDelete(req.params.id);
-    res.json({ success: true, message: "Note deleted successfully" });
+    const { department, semester } = req.query;
+    const filter = {};
+    if (department) filter.department = department;
+    if (semester) filter.semester = Number(semester);
+
+    const pyqs = await PYQ.find(filter).sort({ uploadedAt: -1 });
+    res.json(pyqs);
   } catch (err) {
-    console.error("Delete Note Error:", err);
-    res.status(500).json({ success: false, message: "Failed to delete note" });
+    console.error("Fetch PYQs Error:", err);
+    res.status(500).json({ error: "Failed to fetch PYQs" });
+  }
+});
+
+router.post("/pyqs", upload.single("file"), async (req, res) => {
+  try {
+    const { title, subject, description, department, semester } = req.body;
+    if (!title || !subject || !department || !semester || !req.file)
+      return res.status(400).json({ error: "All fields are required" });
+
+    const newPYQ = new PYQ({
+      title,
+      subject,
+      description,
+      department,
+      semester: Number(semester),
+      fileUrl: req.file.path, // Cloudinary URL
+    });
+
+    await newPYQ.save();
+    res.status(201).json(newPYQ);
+  } catch (err) {
+    console.error("Add PYQ Error:", err);
+    res.status(500).json({ error: "Failed to add PYQ" });
   }
 });
 
@@ -192,50 +247,5 @@ router.get("/users", async (_, res) => {
     res.status(500).json({ success: false, message: "Failed to fetch users" });
   }
 });
-
-// pyqs
-
-// -------- GET all PYQs --------
-router.get("/pyqs", async (req, res) => {
-  try {
-    const { department, semester } = req.query;
-    const filter = {};
-    if (department) filter.department = department;
-    if (semester) filter.semester = Number(semester); // convert to number
-
-    const pyqs = await PYQ.find(filter).sort({ uploadedAt: -1 }); // newest first
-    res.json(pyqs); // directly return array
-  } catch (err) {
-    console.error("Fetch PYQs Error:", err);
-    res.status(500).json({ error: "Failed to fetch PYQs" });
-  }
-});
-
-// -------- POST new PYQ --------
-router.post("/pyqs", upload.single("file"), async (req, res) => {
-  try {
-    const { title, subject, description, department, semester } = req.body;
-
-    if (!title || !subject || !department || !semester || !req.file) {
-      return res.status(400).json({ error: "All fields are required" });
-    }
-
-    const newPYQ = new PYQ({
-      title,
-      subject,
-      description,
-      department,
-      semester: Number(semester), // ensure number type
-      fileUrl: `/uploads/${req.file.filename}`,
-    });
-
-    await newPYQ.save();
-    res.status(201).json(newPYQ); // return the saved document
-  } catch (err) {
-    console.error("Add PYQ Error:", err);
-    res.status(500).json({ error: "Failed to add PYQ" });
-  }
-});
-
 
 module.exports = router;
