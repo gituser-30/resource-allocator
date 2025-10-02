@@ -10,11 +10,21 @@ const PYQ = require("../models/PYQ");
 const cors = require("cors");
 const app = express();
 
+// ===== CORS CONFIG =====
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://dbatu-scholor-hub.onrender.com",
+  "https://resource-allocator-admin.onrender.com"
+];
+
+// Allow all origins temporarily if needed
 app.use(cors({
-  origin: "https://resource-allocator-admin.onrender.com", // your frontend domain
-  methods: ["GET","POST","PUT","DELETE","OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true, // if using cookies or auth headers
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) callback(null, true);
+    else callback(new Error("Not allowed by CORS"));
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE"]
 }));
 
 app.use(express.json());
