@@ -7,6 +7,8 @@ const cors = require("cors");
 const path = require("path");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const cloudinary = require("cloudinary").v2;
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
 
 require("dotenv").config();
 
@@ -24,7 +26,8 @@ app.use(express.json());
 // ✅ CORS CONFIGURATION
 const allowedOrigins = [
   "https://dbatu-scholor-hub.onrender.com", // frontend
-  "http://localhost:5173" // local dev
+  "http://localhost:5173" ,// local dev
+  "https://resource-allocator-admin.onrender.com" // 
 ];
 
 app.use(cors({
@@ -38,6 +41,17 @@ app.use(cors({
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    res.setHeader("Access-Control-Allow-Credentials", "true");
+  }
+  next();
+});
+
 
 // ===== ROUTES =====
 const userRoutes = require("./routes/user");
@@ -138,16 +152,22 @@ app.get("/api/resources", async (req, res) => {
 });
 
 // ================== AUTH ROUTES ==================
-const storageProfile = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, "uploads/profiles/"),
-  filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname)
+const profileStorage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: "profiles",        // Cloudinary folder for profile photos
+    allowed_formats: ["jpg", "jpeg", "png"], // only images
+  },
 });
-const uploadProfile = multer({ storage: storageProfile });
+
+const uploadProfile = multer({ storage: profileStorage });
+
 
 // Register
 app.post("/api/auth/register", uploadProfile.single("profilePhoto"), async (req, res) => {
   try {
     const { fullName, email, dob, password } = req.body;
+
     if (!fullName || !email || !dob || !password) {
       return res.status(400).json({ message: "All fields are required" });
     }
@@ -156,7 +176,7 @@ app.post("/api/auth/register", uploadProfile.single("profilePhoto"), async (req,
     if (user) return res.status(400).json({ message: "User already exists" });
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const profilePhoto = req.file ? req.file.filename : null;
+    const profilePhoto = req.file ? req.file.path : null; // <-- Cloudinary URL
 
     user = new User({
       fullName,
@@ -164,11 +184,11 @@ app.post("/api/auth/register", uploadProfile.single("profilePhoto"), async (req,
       dob,
       password: hashedPassword,
       profilePhoto,
-      verified: true
+      verified: true,
     });
 
     await user.save();
-    res.status(201).json({ message: "✅ Registered successfully!", user });
+    return res.status(201).json({ message: "✅ Registered successfully!", user });
   } catch (err) {
     console.error("❌ Register Error:", err);
     res.status(500).json({ message: "Error registering user" });
