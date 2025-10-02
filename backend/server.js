@@ -25,7 +25,11 @@ const app = express();
 
 // Middleware
 app.use(express.json());
-app.use(cors()); // allow all origins while developing
+app.use(cors({
+  origin: "https://dbatu-scholor-hub.onrender.com", // your frontend URL
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
 
 const userRoutes = require("./routes/user");
 app.use("/api/users", userRoutes);
