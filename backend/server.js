@@ -39,7 +39,7 @@ const allowedOrigins = [
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
+      callback(null, true); // allow request
     } else {
       callback(new Error("Not allowed by CORS"));
     }
@@ -47,6 +47,7 @@ app.use(cors({
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
+
 
 
 const userRoutes = require("./routes/user");
