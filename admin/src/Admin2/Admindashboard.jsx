@@ -31,10 +31,10 @@ useEffect(() => {
     try {
       const token = localStorage.getItem("adminToken");
 
-      const usersRes = await axios.get("http://localhost:5000/api/admin/users/count", { headers: { Authorization: `Bearer ${token}` } });
-      const assignmentsRes = await axios.get("http://localhost:5000/api/admin/assignments/count", { headers: { Authorization: `Bearer ${token}` } });
-      const notesRes = await axios.get("http://localhost:5000/api/admin/notes/count", { headers: { Authorization: `Bearer ${token}` } });
-      const pyqsRes = await axios.get("http://localhost:5000/api/admin/pyqs/count", { headers: { Authorization: `Bearer ${token}` } });
+      const usersRes = await axios.get("https://resource-allocator-backendservice.onrender.com/api/admin/users/count", { headers: { Authorization: `Bearer ${token}` } });
+      const assignmentsRes = await axios.get("https://resource-allocator-backendservice.onrender.com/api/admin/assignments/count", { headers: { Authorization: `Bearer ${token}` } });
+      const notesRes = await axios.get("https://resource-allocator-backendservice.onrender.com/api/admin/notes/count", { headers: { Authorization: `Bearer ${token}` } });
+      const pyqsRes = await axios.get("https://resource-allocator-backendservice.onrender.com/api/admin/pyqs/count", { headers: { Authorization: `Bearer ${token}` } });
 
       setStats([
         { title: "Total Users", value: usersRes.data.count, bg: "#2563eb", icon: "👤" },
