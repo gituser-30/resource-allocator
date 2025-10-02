@@ -9,43 +9,34 @@ const PYQsPage = () => {
   const [department, setDepartment] = useState("");
   const [semester, setSemester] = useState("");
   const [subject, setSubject] = useState("");
-  const [year, setYear] = useState(""); // ✅ added year state
+  const [year, setYear] = useState("");
   const [file, setFile] = useState(null);
-  const [title, settittle] = useState(""); 
+  const [title, setTitle] = useState(""); // corrected setter
 
-  // Options
-  const departments = [
-    "Computer Engineering",
-    "Mechanical Engineering",
-    "Civil Engineering",
-    "Electrical Engineering",
-  ];
+  const departments = ["Computer Engineering", "Mechanical Engineering", "Civil Engineering", "Electrical Engineering"];
   const semesters = ["1", "2", "3", "4", "5", "6", "7", "8"];
 
   // Fetch PYQs
- useEffect(() => {
-  const fetchPyqs = async () => {
-    try {
-      const res = await axios.get("http://localhost:5000/api/admin/pyqs", {
-        headers: { Authorization: `Bearer ${localStorage.getItem("adminToken")}` },
-      });
-
-      // Ensure pyqs is an array
-      const pyqsArray = Array.isArray(res.data.pyq) ? res.data.pyq : [];
-      setPyqs(pyqsArray);
-
-    } catch (err) {
-      setError("Failed to fetch PYQs ❌");
-    }
-  };
-  fetchPyqs();
-}, []);
-
+  useEffect(() => {
+    const fetchPyqs = async () => {
+      try {
+        const res = await axios.get(
+          "https://resource-allocator-backendservice.onrender.com/api/admin/pyqs",
+          { headers: { Authorization: `Bearer ${localStorage.getItem("adminToken")}` } }
+        );
+        const pyqsArray = Array.isArray(res.data) ? res.data : [];
+        setPyqs(pyqsArray);
+      } catch (err) {
+        setError("Failed to fetch PYQs ❌");
+      }
+    };
+    fetchPyqs();
+  }, []);
 
   // Add PYQ
   const handleAddPyq = async (e) => {
     e.preventDefault();
-    if (!department || !semester || !subject || !year || !file) {
+    if (!department || !semester || !subject || !year || !file || !title) {
       setError("All fields are required ❌");
       return;
     }
@@ -54,21 +45,30 @@ const PYQsPage = () => {
     formData.append("department", department);
     formData.append("semester", semester);
     formData.append("subject", subject);
-    formData.append("year", year); // ✅ send year to backend
+    formData.append("year", year);
     formData.append("file", file);
     formData.append("title", title);
 
     try {
-      const res = await axios.get("http://localhost:5000/api/admin/pyqs", {
-      headers: { Authorization: `Bearer ${localStorage.getItem("adminToken")}` },
-      });
-      setPyqs(res.data); // guaranteed to be an array
-      setDepartment(""); 
-      setSemester(""); 
-      setSubject(""); 
-      settittle(""); 
-      setYear("");     // ✅ reset year
+      const res = await axios.post(
+        "https://resource-allocator-backendservice.onrender.com/api/admin/pyqs",
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      setPyqs([res.data, ...pyqs]); // prepend new PYQ
+      // Reset form
+      setDepartment("");
+      setSemester("");
+      setSubject("");
+      setYear("");
       setFile(null);
+      setTitle("");
       setError("");
     } catch (err) {
       setError(err.response?.data?.error || "Failed to add PYQ ❌");
@@ -79,7 +79,7 @@ const PYQsPage = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this PYQ?")) return;
     try {
-      await axios.delete(`http://localhost:5000/api/admin/pyqs/${id}`, {
+      await axios.delete(`https://resource-allocator-backendservice.onrender.com/api/admin/pyqs/${id}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("adminToken")}` },
       });
       setPyqs(pyqs.filter((p) => p._id !== id));
@@ -88,7 +88,7 @@ const PYQsPage = () => {
     }
   };
 
-  // Inline styles
+  // Styles
   const containerStyle = { padding: "30px 40px", fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif", background: "#f3f6f9", minHeight: "100vh" };
   const headerStyle = { fontSize: "28px", fontWeight: "700", marginBottom: "20px", color: "#1d4ed8" };
   const formStyle = { marginBottom: "30px", background: "#fff", padding: "20px", borderRadius: "12px", boxShadow: "0 5px 15px rgba(0,0,0,0.1)" };
@@ -103,7 +103,6 @@ const PYQsPage = () => {
   return (
     <div style={containerStyle}>
       <h1 style={headerStyle}>PYQs Management</h1>
-
       {error && <p style={{ color: "red", fontWeight: "600" }}>{error}</p>}
 
       {/* Form */}
@@ -118,41 +117,10 @@ const PYQsPage = () => {
           {semesters.map((s) => <option key={s} value={s}>{s}</option>)}
         </select>
 
-        <input
-          type="text"
-          placeholder="Enter Subject Name"
-          value={subject}
-          onChange={(e) => setSubject(e.target.value)}
-          style={inputStyle}
-          required
-        />
-
-        <input
-          type="text"
-          placeholder="title"
-          value={title}
-          onChange={(e) => settittle(e.target.value)}
-          style={inputStyle}
-          required
-        />
-
-        {/* ✅ Year input */}
-        <input
-          type="text"
-          placeholder="Enter Year (e.g., 2023)"
-          value={year}
-          onChange={(e) => setYear(e.target.value)}
-          style={inputStyle}
-          required
-        />
-
-        <input 
-          type="file" 
-          onChange={(e) => setFile(e.target.files[0])} 
-          style={inputStyle} 
-          accept="application/pdf" 
-          required 
-        />
+        <input type="text" placeholder="Subject" value={subject} onChange={(e) => setSubject(e.target.value)} style={inputStyle} required />
+        <input type="text" placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} style={inputStyle} required />
+        <input type="text" placeholder="Year" value={year} onChange={(e) => setYear(e.target.value)} style={inputStyle} required />
+        <input type="file" onChange={(e) => setFile(e.target.files[0])} style={inputStyle} accept="application/pdf" required />
 
         <button type="submit" style={buttonStyle}>Add PYQ</button>
       </form>
@@ -171,28 +139,23 @@ const PYQsPage = () => {
             </tr>
           </thead>
           <tbody>
-            {Array.isArray(pyqs) && pyqs.length > 0 ? (
-              pyqs.map((p, idx) => (
-                <tr key={p._id}>
-                  <td>{p.department}</td>
-                  <td>{p.semester}</td>
-                  <td>{p.subject}</td>
-                  <td>{p.year}</td>
-                  <td>
-                    <a href={`http://localhost:5000${p.fileUrl}`} target="_blank" rel="noopener noreferrer">View PDF</a>
-                  </td>
-                  <td>
-                    <button onClick={() => handleDelete(p._id)}>Delete</button>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="6" style={{ textAlign: "center" }}>No PYQs found</td>
+            {pyqs.length > 0 ? pyqs.map((p) => (
+              <tr key={p._id}>
+                <td style={tdStyle}>{p.department}</td>
+                <td style={tdStyle}>{p.semester}</td>
+                <td style={tdStyle}>{p.subject}</td>
+                <td style={tdStyle}>{p.year}</td>
+                <td style={tdStyle}>
+                  <a href={p.fileUrl} target="_blank" rel="noopener noreferrer">View PDF</a>
+                </td>
+                <td style={tdStyle}>
+                  <button style={deleteButtonStyle} onClick={() => handleDelete(p._id)}>Delete</button>
+                </td>
               </tr>
+            )) : (
+              <tr><td colSpan="6" style={{ textAlign: "center" }}>No PYQs found</td></tr>
             )}
           </tbody>
-
         </table>
       </div>
     </div>

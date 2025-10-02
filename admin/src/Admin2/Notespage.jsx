@@ -10,26 +10,20 @@ const NotesPage = () => {
   const [semester, setSemester] = useState("");
   const [subject, setSubject] = useState("");
   const [file, setFile] = useState(null); 
-  const [title, settittle] = useState(""); 
+  const [title, setTitle] = useState(""); // corrected setter
 
   // Options
-  const departments = [
-    "Computer",
-    "Mechanical",
-    "Civil",
-    "Electrical",
-  ];
+  const departments = ["Computer", "Mechanical", "Civil", "Electrical"];
   const semesters = ["1", "2", "3", "4", "5", "6", "7", "8"];
 
   // Fetch notes
   useEffect(() => {
     const fetchNotes = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/admin/notes", {
-          headers: { Authorization: `Bearer ${localStorage.getItem("adminToken")}` },
-        });
-
-        // Sometimes backend returns array directly, sometimes inside {notes: []}
+        const res = await axios.get(
+          "https://resource-allocator-backendservice.onrender.com/api/admin/notes",
+          { headers: { Authorization: `Bearer ${localStorage.getItem("adminToken")}` } }
+        );
         setNotes(res.data.notes || res.data);
       } catch (err) {
         setError("Failed to fetch notes ❌");
@@ -41,7 +35,7 @@ const NotesPage = () => {
   // Add note
   const handleAddNote = async (e) => {
     e.preventDefault();
-    if (!department || !semester || !subject || !file) {
+    if (!department || !semester || !subject || !file || !title) {
       setError("All fields are required ❌");
       return;
     }
@@ -54,15 +48,20 @@ const NotesPage = () => {
     formData.append("title", title);
 
     try {
-      const res = await axios.post("http://localhost:5000/api/admin/notes", formData, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const res = await axios.post(
+        "https://resource-allocator-backendservice.onrender.com/api/admin/notes",
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
 
-      setNotes([...notes, res.data.note]); // add new note
-      setDepartment(""); setSemester(""); setSubject(""); setFile(null);
+      setNotes([res.data.note, ...notes]); // prepend new note
+      // Reset form
+      setDepartment(""); setSemester(""); setSubject(""); setFile(null); setTitle("");
       setError("");
     } catch (err) {
       setError(err.response?.data?.error || "Failed to add note ❌");
@@ -73,17 +72,17 @@ const NotesPage = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this note?")) return;
     try {
-      await axios.delete(`http://localhost:5000/api/admin/notes/${id}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("adminToken")}` },
-      });
+      await axios.delete(
+        `https://resource-allocator-backendservice.onrender.com/api/admin/notes/${id}`,
+        { headers: { Authorization: `Bearer ${localStorage.getItem("adminToken")}` } }
+      );
       setNotes(notes.filter((n) => n._id !== id));
     } catch (err) {
       alert("Failed to delete note ❌");
     }
   };
-  
 
-  // Inline styles
+  // Styles
   const containerStyle = { padding: "30px 40px", fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif", background: "#f3f6f9", minHeight: "100vh" };
   const headerStyle = { fontSize: "28px", fontWeight: "700", marginBottom: "20px", color: "#1d4ed8" };
   const formStyle = { marginBottom: "30px", background: "#fff", padding: "20px", borderRadius: "12px", boxShadow: "0 5px 15px rgba(0,0,0,0.1)" };
@@ -113,25 +112,10 @@ const NotesPage = () => {
           {semesters.map((s) => <option key={s} value={s}>{s}</option>)}
         </select>
 
-        <input
-          type="text"
-          placeholder="Enter Subject Name"
-          value={subject}
-          onChange={(e) => setSubject(e.target.value)}
-          style={inputStyle}
-          required
-        />
-
-        <input
-          type="text"
-          placeholder="title"
-          value={title}
-          onChange={(e) => settittle(e.target.value)}
-          style={inputStyle}
-          required
-        />
-
+        <input type="text" placeholder="Enter Subject Name" value={subject} onChange={(e) => setSubject(e.target.value)} style={inputStyle} required />
+        <input type="text" placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} style={inputStyle} required />
         <input type="file" onChange={(e) => setFile(e.target.files[0])} style={inputStyle} accept="application/pdf" required />
+
         <button type="submit" style={buttonStyle}>Add Note</button>
       </form>
 
@@ -159,7 +143,7 @@ const NotesPage = () => {
                   <td style={tdStyle}>{n.semester}</td>
                   <td style={tdStyle}>{n.subject}</td>
                   <td style={tdStyle}>
-                    <a href={`http://localhost:5000${n.fileUrl}`} target="_blank" rel="noopener noreferrer" style={{ color: "#1d4ed8", fontWeight: "600" }}>View PDF</a>
+                    <a href={n.fileUrl} target="_blank" rel="noopener noreferrer" style={{ color: "#1d4ed8", fontWeight: "600" }}>View PDF</a>
                   </td>
                   <td style={tdStyle}>
                     <button style={deleteButtonStyle} onClick={() => handleDelete(n._id)}>Delete</button>
