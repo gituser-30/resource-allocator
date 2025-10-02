@@ -156,9 +156,10 @@ router.post("/assignments", upload.single("file"), async (req, res) => {
     res.status(201).json({ success: true, assignment: newAssignment });
   } catch (err) {
     console.error("Add Assignment Error:", err);
-    res.status(500).json({ success: false, message: "Failed to add assignment" });
+    res.status(500).json({ success: false, message: err.message }); // <-- show the real error
   }
 });
+
 
 // ---------------- Notes ----------------
 router.get("/notes", async (req, res) => {
