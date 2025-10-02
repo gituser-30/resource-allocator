@@ -124,24 +124,44 @@ router.get("/assignments", async (req, res) => {
 
 router.post("/assignments", upload.single("file"), async (req, res) => {
   try {
+    console.log("REQ.BODY:", req.body);
+    console.log("REQ.FILE:", req.file);
+
     const { title, department, semester, subject } = req.body;
-    if (!title || !department || !semester || !subject || !req.file) {
+
+    // Validate required fields
+    if (!title || !department || !semester || !subject) {
       return res.status(400).json({ success: false, message: "All fields are required" });
     }
 
+    if (!req.file || !req.file.path) {
+      return res.status(400).json({ success: false, message: "File upload failed" });
+    }
+
+    // Create new assignment
     const newAssignment = new Assignment({
       title,
       department,
       semester,
       subject,
-      fileUrl: req.file.path,
+      fileUrl: req.file.path, // Cloudinary URL
     });
 
     await newAssignment.save();
+
     res.status(201).json({ success: true, assignment: newAssignment });
   } catch (err) {
     console.error("Add Assignment Error:", err);
-    res.status(500).json({ success: false, message: "Failed to add assignment" });
+
+    // More detailed error messages for debugging
+    if (err.name === "MulterError") {
+      res.status(500).json({ success: false, message: "Multer upload error", error: err.message });
+    } else if (err.name === "Error" && err.http_code) {
+      // Cloudinary-specific error
+      res.status(500).json({ success: false, message: "Cloudinary error", error: err.message });
+    } else {
+      res.status(500).json({ success: false, message: "Failed to add assignment", error: err.message });
+    }
   }
 });
 
