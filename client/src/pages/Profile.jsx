@@ -39,7 +39,7 @@ const Profile = () => {
       }
 
       const res = await axios.put(
-        `http://localhost:5000/api/users/update-profile/${userId}`,
+        `https://resource-allocator-backendservice.onrender.com/api/users/update-profile/${userId}`,
         form,
         { headers: { "Content-Type": "application/json" } }
       );
@@ -68,7 +68,7 @@ const Profile = () => {
       }
 
       const res = await axios.put(
-        `http://localhost:5000/api/users/change-password/${userId}`,
+        `https://resource-allocator-backendservice.onrender.com/api/users/change-password/${userId}`,
         passwordData,
         { headers: { "Content-Type": "application/json" } }
       );
@@ -96,7 +96,7 @@ const Profile = () => {
             <img
               src={
                 user.profilePhoto
-                  ? `http://localhost:5000/uploads/profiles/${user.profilePhoto}`
+                  ? `https://resource-allocator-backendservice.onrender.com/uploads/profiles/${user.profilePhoto}`
                   : "/images/default-avatar.png"
               }
               alt="Profile"
