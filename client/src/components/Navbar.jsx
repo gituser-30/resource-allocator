@@ -1,5 +1,5 @@
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
-
+import head from "../image/Head_logo.png";
 const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -28,7 +28,7 @@ const Navbar = () => {
           to="/"
         >
           <img
-            src="client\src\image\Head_logo.png"
+            src={head}
             alt="Dbatu Scholar Hub Logo"
             style={{
               width: "60px",
