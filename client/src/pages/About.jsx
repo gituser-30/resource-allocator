@@ -6,7 +6,7 @@ const About = () => {
       <div className="container py-5 text-light">
         <div className="text-center mb-4">
           <img
-            src="/images/Head_logo.png"
+            src="/Head_logo.png"
             alt="Dbatu Scholar Hub Logo"
             style={{
               width: "180px",
