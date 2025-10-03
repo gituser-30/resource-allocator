@@ -17,7 +17,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="navbar navbar-expand-md navbar-dark bg-light shadow-lg sticky-top">
+    <nav className="navbar navbar-expand-md navbar-light bg-black shadow-lg sticky-top">
       <div className="container-fluid">
         {/* Brand */}
         <NavLink className="navbar-brand d-flex align-items-center" to="/">
