@@ -257,6 +257,28 @@ app.use(express.json());
 // parse urlencoded bodies (for form posts without files)
 app.use(express.urlencoded({ extended: true }));
 
+// ✅ Handle preflight requests globally
+app.options("*", cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.has(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error("Not allowed by CORS"));
+  },
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  credentials: true,
+}));
+
+// ✅ Safeguard middleware to ensure all responses have CORS headers
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (allowedOrigins.has(origin)) {
+    res.header("Access-Control-Allow-Origin", origin);
+  }
+  res.header("Access-Control-Allow-Credentials", "true");
+  next();
+});
+
 // ✅ CORS CONFIGURATION
 const allowedOrigins = new Set([
   "https://dbatu-scholor-hub.onrender.com",
