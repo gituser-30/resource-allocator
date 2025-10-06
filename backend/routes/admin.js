@@ -6,7 +6,7 @@ const path = require("path");
 const multer = require("multer");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const cloudinary = require("cloudinary").v2;
-
+const upload = require("../middleware/upload"); // ✅ add this line
 const Admin = require("../models/Admin");
 const Assignment = require("../models/Assignment");
 const Note = require("../models/Note");
