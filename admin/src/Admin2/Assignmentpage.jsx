@@ -17,7 +17,7 @@ const AssignmentsPage = () => {
   useEffect(() => {
     const fetchAssignments = async () => {
       try {
-        const res = await axios.get("/api/admin/assignments", {
+        const res = await axios.get("https://resource-allocator-backendservice.onrender.com/api/admin/assignments", {
           headers: { Authorization: `Bearer ${localStorage.getItem("adminToken")}` },
         });
         setAssignments(res.data.assignments);
@@ -43,7 +43,7 @@ const AssignmentsPage = () => {
     formData.append("file", file);
 
     try {
-      const res = await axios.post("/api/admin/assignments", formData, {
+      const res = await axios.post("https://resource-allocator-backendservice.onrender.com/api/admin/assignments", formData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
           "Content-Type": "multipart/form-data",
@@ -61,7 +61,7 @@ const AssignmentsPage = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this assignment?")) return;
     try {
-      await axios.delete(`/api/admin/assignments/${id}`, {
+      await axios.delete(`https://resource-allocator-backendservice.onrender.com/api/admin/assignments/${id}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("adminToken")}` },
       });
       setAssignments(assignments.filter(a => a._id !== id));
