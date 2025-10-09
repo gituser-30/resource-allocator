@@ -258,7 +258,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ✅ Handle preflight requests globally
-app.options("*", cors({
+app.options("/*", cors({
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.has(origin)) {
       return callback(null, true);
