@@ -1,8 +1,10 @@
 // middleware/upload.js
-const multer = require("multer");
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
-const cloudinary = require("cloudinary").v2;
-require("dotenv").config();
+import multer from "multer";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
+import { v2 as cloudinary } from "cloudinary";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 // Ensure env variables are present
 if (!process.env.CLOUD_NAME || !process.env.CLOUD_API_KEY || !process.env.CLOUD_API_SECRET) {
@@ -20,14 +22,14 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary,
   params: async (req, file) => ({
-    folder: "uploads", // You can change folder name here
+    folder: "assignments", // Change folder as needed
     allowed_formats: ["pdf", "jpg", "jpeg", "png"],
     public_id: `${Date.now()}-${file.originalname.split(".")[0]}`,
-    resource_type: "auto", // Handles pdf, image, etc.
+    resource_type: "auto",
   }),
 });
 
 // ---------------- Multer Instance ----------------
 const upload = multer({ storage });
 
-module.exports = upload;
+export default upload;
