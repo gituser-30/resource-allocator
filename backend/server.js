@@ -1,8 +1,11 @@
+// server.js
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
 import path from "path";
+import fs from "fs";
+import { fileURLToPath } from "url";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
@@ -18,12 +21,12 @@ import userRoutes from "./routes/user.js";
 import authRoutes from "./routes/auth.js";
 
 import localUpload from "./middleware/upload.js"; // local multer
-import fs from "fs";
 
-import { fileURLToPath } from "url";
+dotenv.config();
 
+const app = express();
 
-// Fix __dirname in ESM
+// ================== __dirname fix for ESM ==================
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -32,11 +35,6 @@ const uploadDir = path.join(__dirname, "uploads");
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir);
 }
-
-
-
-dotenv.config();
-const app = express();
 
 // ================== CORS ==================
 const allowedOrigins = new Set([
@@ -69,8 +67,7 @@ mongoose.connect(process.env.MONGO_URI)
   .catch(err => console.error("❌ MongoDB error:", err));
 
 // ================== STATIC FILES (uploads) ==================
-const __dirname = path.resolve();
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/uploads", express.static(uploadDir));
 
 // ================== ROUTES ==================
 app.use("/api/admin", adminRoutes);
