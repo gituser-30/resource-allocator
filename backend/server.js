@@ -20,7 +20,6 @@ import authRoutes from "./routes/auth.js";
 import localUpload from "./middleware/upload.js"; // local multer
 import fs from "fs";
 
-import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
 
