@@ -18,7 +18,12 @@ import userRoutes from "./routes/user.js";
 import authRoutes from "./routes/auth.js";
 
 import localUpload from "./middleware/upload.js"; // local multer
+import fs from "fs";
 
+const uploadDir = path.join(__dirname, "uploads");
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir);
+}
 dotenv.config();
 const app = express();
 
