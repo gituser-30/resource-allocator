@@ -2,15 +2,16 @@
 import express from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
 
 import Admin from "../models/Admin.js";
 import Assignment from "../models/Assignment.js";
 import Note from "../models/Note.js";
 import PYQ from "../models/PYQ.js";
 import User from "../models/User.js";
-
 import upload from "../middleware/upload.js";
-require("dotenv").config();
+
+dotenv.config();
 
 const router = express.Router();
 
@@ -188,4 +189,5 @@ router.post("/pyqs", upload.single("file"), async (req, res) => {
   }
 });
 
-module.exports = router;
+// ✅ Export as ES Module
+export default router;
