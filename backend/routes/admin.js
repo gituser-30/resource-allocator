@@ -62,6 +62,18 @@ router.get("/users/count", async (_, res) => {
   }
 });
 
+// Get all users
+router.get("/users", async (req, res) => {
+  try {
+    const users = await User.find().sort({ createdAt: -1 }); // get all users sorted by newest first
+    res.json({ success: true, users });
+  } catch (err) {
+    console.error("Fetch Users Error:", err);
+    res.status(500).json({ success: false, message: "Failed to fetch users" });
+  }
+});
+
+
 router.get("/assignments/count", async (_, res) => {
   try {
     const count = await Assignment.countDocuments();
