@@ -12,6 +12,7 @@ const assignmentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// 👇 THIS IS IMPORTANT
-const Assignment = mongoose.model("Assignment", assignmentSchema);
+// ✅ Prevent model overwrite errors
+const Assignment = mongoose.models.Assignment || mongoose.model("Assignment", assignmentSchema);
+
 export default Assignment;
