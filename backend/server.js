@@ -575,6 +575,19 @@ const localStorage = multer.diskStorage({
 });
 const localUpload = multer({ storage: localStorage });
 
+// ================== CLOUDINARY TEST ROUTE ==================
+app.get("/test-cloud", async (req, res) => {
+  try {
+    const result = await cloudinary.v2.api.ping();
+    res.json({ success: true, result });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+
+
+
 // ================== ROUTES ==================
 app.use("/api/admin", adminRoutes);
 app.use("/api/users", userRoutes);
