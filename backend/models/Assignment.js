@@ -1,3 +1,4 @@
+// models/Assignment.js
 import mongoose from "mongoose";
 
 const assignmentSchema = new mongoose.Schema(
@@ -11,4 +12,6 @@ const assignmentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.model("Assignment", assignmentSchema);
+// 👇 THIS IS IMPORTANT
+const Assignment = mongoose.model("Assignment", assignmentSchema);
+export default Assignment;
