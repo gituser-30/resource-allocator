@@ -1,26 +1,25 @@
+// middleware/upload.js
 import multer from "multer";
-import { v2 as cloudinary } from "cloudinary";
-import { CloudinaryStorage } from "multer-storage-cloudinary";
-import dotenv from "dotenv";
-dotenv.config();
+import path from "path";
 
-// ---------------- Cloudinary Config ----------------
-cloudinary.config({
-  cloud_name: process.env.CLOUD_NAME,
-  api_key: process.env.CLOUD_API_KEY,
-  api_secret: process.env.CLOUD_API_SECRET,
+// Set storage engine
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/"); // folder for local uploads
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + "-" + file.originalname);
+  },
 });
 
-// ---------------- Multer Cloudinary Storage ----------------
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: async (req, file) => ({
-    folder: "uploads",
-    allowed_formats: ["pdf", "jpg", "jpeg", "png"],
-    public_id: `${Date.now()}-${file.originalname.split(".")[0]}`,
-    resource_type: "auto",
-  }),
-});
+// File filter (allow PDF, JPG, PNG)
+const fileFilter = (req, file, cb) => {
+  const allowedExt = [".pdf", ".jpg", ".jpeg", ".png"];
+  const ext = path.extname(file.originalname).toLowerCase();
+  if (allowedExt.includes(ext)) cb(null, true);
+  else cb(new Error("Only PDF, JPG, JPEG, PNG files are allowed"));
+};
 
-const upload = multer({ storage });
+const upload = multer({ storage, fileFilter });
+
 export default upload;
