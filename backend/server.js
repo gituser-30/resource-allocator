@@ -543,20 +543,38 @@ cloudinary.v2.config({
 });
 
 // Multer-Cloudinary storage
-const cloudStorage = (folder, allowed_formats) => new CloudinaryStorage({
-  cloudinary: cloudinary.v2,
-  params: {
-    folder,
-    allowed_formats,
-    public_id: (req, file) => `${Date.now()}-${file.originalname.split(".")[0]}`
-  }
+// Multer-Cloudinary storage helper
+const cloudStorage = (folder, allowed_formats) =>
+  new CloudinaryStorage({
+    cloudinary: cloudinary.v2,
+    params: {
+      folder,
+      allowed_formats,
+      public_id: (req, file) => `${Date.now()}-${file.originalname.split(".")[0]}`,
+    },
+  });
+
+// Upload instances
+export const uploadAssignment = multer({
+  storage: cloudStorage("assignments", ["pdf", "jpg", "jpeg", "png"]),
+});
+export const uploadNote = multer({
+  storage: cloudStorage("notes", ["pdf", "jpg", "jpeg", "png"]),
+});
+export const uploadPYQ = multer({
+  storage: cloudStorage("pyqs", ["pdf", "jpg", "jpeg", "png"]),
+});
+export const uploadProfile = multer({
+  storage: cloudStorage("profiles", ["jpg", "jpeg", "png"]),
 });
 
-// Multer upload instances
-export const uploadAssignment = multer({ storage: cloudStorage("assignments", ["pdf", "jpg", "jpeg", "png"]) });
-export const uploadNote = multer({ storage: cloudStorage("notes", ["pdf", "jpg", "jpeg", "png"]) });
-export const uploadPYQ = multer({ storage: cloudStorage("pyqs", ["pdf", "jpg", "jpeg", "png"]) });
-export const uploadProfile = multer({ storage: cloudStorage("profiles", ["jpg", "jpeg", "png"]) });
+// Fallback local upload (if Cloudinary fails)
+const localStorage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, "uploads/"),
+  filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
+});
+export const localUpload = multer({ storage: localStorage });
+
 
 // ================== MODELS ==================
 import User from "./models/User.js";
