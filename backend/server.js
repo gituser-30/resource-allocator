@@ -495,12 +495,22 @@ import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
 import path from "path";
-import cloudinary from "cloudinary";
+import { v2 as cloudinary } from "cloudinary";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 import multer from "multer";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
+
+import User from "./models/User.js";
+import Note from "./models/Note.js";
+import Assignment from "./models/Assignment.js";
+import PYQ from "./models/PYQ.js";
+import Admin from "./models/Admin.js";
+
+import adminRoutes from "./routes/admin.js";
+import userRoutes from "./routes/user.js";
+import authRoutes from "./routes/auth.js";
 
 dotenv.config();
 const app = express();
@@ -526,7 +536,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// ================== PARSE JSON ==================
+// ================== JSON PARSING ==================
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -535,18 +545,17 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB connected"))
   .catch(err => console.error("❌ MongoDB error:", err));
 
-// ================== CLOUDINARY ==================
-cloudinary.v2.config({
+// ================== CLOUDINARY CONFIG ==================
+cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
   api_key: process.env.CLOUD_API_KEY,
   api_secret: process.env.CLOUD_API_SECRET,
 });
 
-// Multer-Cloudinary storage
-// Multer-Cloudinary storage helper
+// ================== MULTER STORAGE ==================
 const cloudStorage = (folder, allowed_formats) =>
   new CloudinaryStorage({
-    cloudinary: cloudinary.v2,
+    cloudinary,
     params: {
       folder,
       allowed_formats,
@@ -554,49 +563,24 @@ const cloudStorage = (folder, allowed_formats) =>
     },
   });
 
-// Upload instances
-export const uploadAssignment = multer({
-  storage: cloudStorage("assignments", ["pdf", "jpg", "jpeg", "png"]),
-});
-export const uploadNote = multer({
-  storage: cloudStorage("notes", ["pdf", "jpg", "jpeg", "png"]),
-});
-export const uploadPYQ = multer({
-  storage: cloudStorage("pyqs", ["pdf", "jpg", "jpeg", "png"]),
-});
-export const uploadProfile = multer({
-  storage: cloudStorage("profiles", ["jpg", "jpeg", "png"]),
-});
+const uploadAssignment = multer({ storage: cloudStorage("assignments", ["pdf", "jpg", "jpeg", "png"]) });
+const uploadNote = multer({ storage: cloudStorage("notes", ["pdf", "jpg", "jpeg", "png"]) });
+const uploadPYQ = multer({ storage: cloudStorage("pyqs", ["pdf", "jpg", "jpeg", "png"]) });
+const uploadProfile = multer({ storage: cloudStorage("profiles", ["jpg", "jpeg", "png"]) });
 
-// Fallback local upload (if Cloudinary fails)
+// Fallback local upload (only defined once)
 const localStorage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, "uploads/"),
   filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
 });
-export const localUpload = multer({ storage: localStorage });
-
-
-// ================== MODELS ==================
-import User from "./models/User.js";
-import Note from "./models/Note.js";
-import Assignment from "./models/Assignment.js";
-import PYQ from "./models/PYQ.js";
-import Admin from "./models/Admin.js";
+const localUpload = multer({ storage: localStorage });
 
 // ================== ROUTES ==================
-// Admin routes
-import adminRoutes from "./routes/admin.js";
 app.use("/api/admin", adminRoutes);
-
-// User routes
-import userRoutes from "./routes/user.js";
 app.use("/api/users", userRoutes);
-
-// Auth routes
-import authRoutes from "./routes/auth.js";
 app.use("/api/auth", authRoutes);
 
-// ================== CONTACT ==================
+// ================== CONTACT FORM ==================
 app.post("/contact", async (req, res) => {
   const { name, email, subject, message } = req.body;
   try {
@@ -624,16 +608,11 @@ app.post("/contact", async (req, res) => {
   }
 });
 
-// ================== STATIC UPLOADS (fallback) ==================
+// ================== STATIC FILES (uploads) ==================
 const __dirname = path.resolve();
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-const localStorage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, "uploads/"),
-  filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname)
-});
-const localUpload = multer({ storage: localStorage });
-
+// ================== FILE UPLOAD API (local fallback) ==================
 app.post("/api/notes/upload", localUpload.single("file"), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: "No file uploaded" });
@@ -641,12 +620,9 @@ app.post("/api/notes/upload", localUpload.single("file"), async (req, res) => {
     const { title, subject, description, department, semester, type } = req.body;
     const fileUrl = `/uploads/${req.file.filename}`;
 
-    let newDoc;
-    if (type === "assignment") {
-      newDoc = new Assignment({ title, subject, description, department, semester, fileUrl });
-    } else {
-      newDoc = new Note({ title, subject, description, department, semester, fileUrl });
-    }
+    const newDoc = type === "assignment"
+      ? new Assignment({ title, subject, description, department, semester, fileUrl })
+      : new Note({ title, subject, description, department, semester, fileUrl });
 
     await newDoc.save();
     res.json({ message: "✅ File uploaded successfully!", doc: newDoc });
@@ -659,9 +635,14 @@ app.post("/api/notes/upload", localUpload.single("file"), async (req, res) => {
 // ================== GLOBAL ERROR HANDLER ==================
 app.use((err, req, res, next) => {
   console.error("Unhandled error:", err);
-  res.status(500).json({ success: false, message: "Internal Server Error", error: err.message });
+  res.status(500).json({
+    success: false,
+    message: "Internal Server Error",
+    error: err.message,
+  });
 });
 
-// ================== START SERVER ==================
+// ================== SERVER START ==================
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+
