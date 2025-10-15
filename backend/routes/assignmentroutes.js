@@ -3,6 +3,7 @@ import express from "express";
 import multer from "multer";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 import { v2 as cloudinary } from "cloudinary";
+import dotenv from "dotenv";
 import auth from "../middleware/auth.js";
 import {
   getAssignments,
@@ -10,6 +11,8 @@ import {
   deleteAssignment,
   getAssignmentCount,
 } from "../Controllers/assignmentcontroller.js";
+
+dotenv.config(); // ensure env vars are loaded
 
 const router = express.Router();
 
@@ -25,7 +28,7 @@ const storage = new CloudinaryStorage({
   cloudinary,
   params: async (req, file) => ({
     folder: "assignments",
-    allowed_formats: ["pdf", "jpg", "jpeg", "png"],
+    allowed_formats: ["pdf", "jpg", "jpeg", "png"], // ✅ safe format list
     public_id: `${Date.now()}-${file.originalname.split(".")[0]}`,
   }),
 });
@@ -33,9 +36,16 @@ const storage = new CloudinaryStorage({
 const upload = multer({ storage });
 
 // ---------------- Routes ----------------
-router.get("/", auth, getAssignments);
-router.post("/", auth, upload.single("file"), addAssignment);
-router.delete("/:id", auth, deleteAssignment);
+// ✅ Count route first to prevent conflict with "/:id"
 router.get("/count", auth, getAssignmentCount);
+
+// ✅ Get all assignments
+router.get("/", auth, getAssignments);
+
+// ✅ Add a new assignment (with file upload)
+router.post("/", auth, upload.single("file"), addAssignment);
+
+// ✅ Delete assignment by ID
+router.delete("/:id", auth, deleteAssignment);
 
 export default router;
