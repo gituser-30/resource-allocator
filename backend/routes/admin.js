@@ -1,13 +1,15 @@
 // routes/admin.js
-const express = require("express");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const Admin = require("../models/Admin");
-const Assignment = require("../models/Assignment");
-const Note = require("../models/Note");
-const PYQ = require("../models/PYQ");
-const User = require("../models/User");
-const upload = require("../middleware/upload");
+import express from "express";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+
+import Admin from "../models/Admin.js";
+import Assignment from "../models/Assignment.js";
+import Note from "../models/Note.js";
+import PYQ from "../models/PYQ.js";
+import User from "../models/User.js";
+
+import upload from "../middleware/upload.js";
 require("dotenv").config();
 
 const router = express.Router();
