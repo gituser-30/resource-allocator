@@ -36,27 +36,29 @@ dotenv.config();
 const app = express();
 
 // ========== CORS SETUP ==========
+// ✅ CORS FIX (Put this before your routes)
 const allowedOrigins = [
   "https://dbatu-scholor-hub.onrender.com",
   "http://localhost:5173",
   "https://resource-allocator-admin.onrender.com",
 ];
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
-      return callback(new Error("Not allowed by CORS"));
-    },
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    credentials: true,
-  })
-);
-
 app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.header("Access-Control-Allow-Origin", origin);
+  }
+
+  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.header("Access-Control-Allow-Credentials", "true");
+
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
   next();
 });
+
 
 // ========== JSON PARSING ==========
 app.use(express.json());
