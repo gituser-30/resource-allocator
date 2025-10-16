@@ -41,14 +41,15 @@ router.post("/register", upload.single("profilePhoto"), async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // create user
-    const user = new User({
-      fullName,
-      email,
-      dob,
-      password: hashedPassword,
-      profilePhoto: req.file ? req.file.filename : null,
-      verified: true // 👈 set to false if you add email verification
-    });
+   const user = new User({
+  fullName,
+  email,
+  dob,
+  password: hashedPassword,
+  profilePhoto: req.file ? req.file.filename : null,
+  verified: true, // ✅ force true for dev
+});
+
 
     await user.save();
 
